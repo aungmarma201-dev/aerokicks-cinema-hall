@@ -1,7 +1,7 @@
 # Aerokicks Cinema Hall
 
 A small browser-based cinema ticket counter inspired by the simple interactive layout of the Morse Code WebApp example. Visitors can use the ticket calculator directly on the website, while the original command-line Python version is available to download.
-
+Website: file:///E:/github%20vault/aerokicks-cinema-hall-web/index.html
 ## Features
 
 - Buy between 1 and 10 tickets at $10 each
