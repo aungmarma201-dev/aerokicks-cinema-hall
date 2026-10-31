@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Book cinema tickets, add snacks, and calculate your bill with Aerokicks Cinema Hall.">
+  <title>Aerokicks Cinema Hall</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0d12;
+      --panel: #131720;
+      --panel-2: #191f2b;
+      --text: #f4f6fb;
+      --muted: #9ba5b5;
+      --accent: #f6b94a;
+      --accent-dark: #2c2110;
+      --border: #293142;
+      --green: #76d6a0;
+      --red: #ff8c8c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(ellipse at 50% -15%, #222b3d 0, var(--bg) 56%);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    .wrap { width: min(920px, calc(100% - 32px)); margin: 0 auto; padding: 42px 0 28px; }
+    header { text-align: center; margin-bottom: 28px; }
+    .eyebrow { color: var(--accent); font-size: .75rem; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
+    h1 { margin: 8px 0 6px; font-size: clamp(2rem, 6vw, 3.25rem); line-height: 1.05; letter-spacing: -.045em; }
+    .subtitle { color: var(--muted); margin: 0; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr); gap: 18px; align-items: start; }
+    .card { background: rgba(19, 23, 32, .94); border: 1px solid var(--border); border-radius: 18px; padding: 22px; box-shadow: 0 18px 55px #0004; }
+    .card h2 { margin: 0 0 17px; font-size: 1.12rem; letter-spacing: -.02em; }
+    label { display: block; margin-bottom: 7px; color: #dce2ec; font-size: .9rem; font-weight: 650; }
+    input, select {
+      width: 100%; min-height: 46px; border: 1px solid var(--border); border-radius: 10px;
+      background: var(--panel-2); color: var(--text); padding: 10px 12px; font: inherit; outline: none;
+    }
+    input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px #f6b94a22; }
+    .field { margin-bottom: 18px; }
+    .hint { color: var(--muted); font-size: .8rem; margin: 6px 0 0; }
+    .food-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; }
+    button, .download {
+      min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      border: 0; border-radius: 10px; padding: 10px 15px; font: inherit; font-weight: 750; cursor: pointer;
+      transition: transform .15s ease, filter .15s ease;
+    }
+    button:hover, .download:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    button:active, .download:active { transform: translateY(0); }
+    .primary { background: var(--accent); color: #241807; }
+    .secondary { background: #252d3b; color: var(--text); border: 1px solid var(--border); }
+    .remove { min-height: 32px; padding: 4px 9px; background: #362126; color: #ffb4b4; font-size: .78rem; }
+    .food-list { list-style: none; padding: 0; margin: 12px 0 0; }
+    .food-list li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #252d3a; color: #e8edf5; }
+    .food-list li:last-child { border-bottom: 0; }
+    .empty { color: var(--muted); font-size: .88rem; padding: 8px 0; }
+    .summary { position: sticky; top: 18px; }
+    .summary-line { display: flex; justify-content: space-between; gap: 14px; color: var(--muted); padding: 9px 0; font-size: .92rem; }
+    .summary-line strong { color: var(--text); font-weight: 650; text-align: right; }
+    .discount { color: var(--green) !important; }
+    .rule { height: 1px; background: var(--border); margin: 10px 0; }
+    .total { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-top: 10px; }
+    .total span { color: var(--muted); font-weight: 650; }
+    .total strong { color: var(--accent); font-size: 2rem; letter-spacing: -.04em; }
+    .notice { min-height: 22px; margin: 12px 0 0; color: var(--red); font-size: .84rem; }
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+    .actions button { width: 100%; }
+    .receipt { display: none; margin-top: 16px; padding: 14px; border: 1px dashed #536075; border-radius: 12px; background: #10151e; }
+    .receipt.show { display: block; }
+    .receipt h3 { margin: 0 0 8px; }
+    .receipt p { margin: 4px 0; color: var(--muted); font-size: .88rem; }
+    footer { text-align: center; color: var(--muted); font-size: .82rem; margin-top: 22px; }
+    footer a { color: var(--accent); text-decoration: none; }
+    @media (max-width: 720px) {
+      .wrap { padding-top: 28px; }
+      .layout { grid-template-columns: 1fr; }
+      .summary { position: static; }
+      .card { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <div class="eyebrow">Your movie night starts here</div>
+      <h1>Aerokicks Cinema Hall</h1>
+      <p class="subtitle">Book tickets, choose your snacks, and calculate your total.</p>
+    </header>
+
+    <div class="layout">
+      <section class="card" aria-labelledby="booking-title">
+        <h2 id="booking-title">Ticket &amp; food selection</h2>
+        <div class="field">
+          <label for="tickets">Number of tickets</label>
+          <input id="tickets" type="number" min="1" max="10" step="1" value="1" inputmode="numeric">
+          <p class="hint">$10 per ticket. Buy more than 5 tickets to receive 10% off.</p>
+        </div>
+
+        <div class="field">
+          <label for="food">Choose a snack</label>
+          <div class="food-row">
+            <select id="food">
+              <option value="popcorn">Popcorn — $5</option>
+              <option value="soda">Soda — $3</option>
+              <option value="candy">Candy — $2</option>
+            </select>
+            <button class="primary" id="add-food" type="button">Add snack</button>
+          </div>
+          <ul class="food-list" id="food-list" aria-live="polite">
+            <li class="empty" id="empty-food">No snacks added yet.</li>
+          </ul>
+        </div>
+        <button class="secondary" id="clear-food" type="button">Remove all snacks</button>
+      </section>
+
+      <aside class="card summary" aria-labelledby="summary-title">
+        <h2 id="summary-title">Order summary</h2>
+        <div class="summary-line"><span>Tickets</span><strong id="ticket-count">1 × $10.00</strong></div>
+        <div class="summary-line"><span>Ticket subtotal</span><strong id="ticket-subtotal">$10.00</strong></div>
+        <div class="summary-line"><span>Discount</span><strong class="discount" id="discount">−$0.00</strong></div>
+        <div class="summary-line"><span>Snacks</span><strong id="snack-total">$0.00</strong></div>
+        <div class="rule"></div>
+        <div class="total"><span>Final total</span><strong id="total">$10.00</strong></div>
+        <p class="notice" id="notice" role="status"></p>
+        <div class="actions">
+          <button class="primary" id="checkout" type="button">Generate bill</button>
+          <button class="secondary" id="reset" type="button">Reset</button>
+        </div>
+        <div class="receipt" id="receipt" aria-live="polite">
+          <h3>Thank you for choosing Aerokicks!</h3>
+          <p id="receipt-tickets"></p>
+          <p id="receipt-snacks"></p>
+          <p id="receipt-discount"></p>
+          <p id="receipt-total"></p>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      <a href="./movie_ticket_counter.py" download>Download Python version</a>
+      <span> · Built by aerokicks</span>
+    </footer>
+  </main>
+
+  <script>
+    const prices = { popcorn: 5, soda: 3, candy: 2 };
+    const ticketsInput = document.getElementById('tickets');
+    const foodSelect = document.getElementById('food');
+    const foodList = document.getElementById('food-list');
+    const notice = document.getElementById('notice');
+    let snacks = [];
+
+    const money = amount => `$${amount.toFixed(2)}`;
+    const snackTotal = () => snacks.reduce((sum, snack) => sum + prices[snack], 0);
+
+    function calculate() {
+      const raw = Number(ticketsInput.value);
+      const valid = Number.isInteger(raw) && raw >= 1 && raw <= 10;
+      const ticketCount = valid ? raw : 0;
+      const subtotal = ticketCount * 10;
+      const discount = ticketCount > 5 ? subtotal * 0.10 : 0;
+      const food = snackTotal();
+      const total = subtotal - discount + food;
+
+      document.getElementById('ticket-count').textContent = valid ? `${ticketCount} × $10.00` : '—';
+      document.getElementById('ticket-subtotal').textContent = money(subtotal);
+      document.getElementById('discount').textContent = `−${money(discount)}`;
+      document.getElementById('snack-total').textContent = money(food);
+      document.getElementById('total').textContent = money(total);
+      notice.textContent = valid ? '' : 'Enter a whole number of tickets from 1 to 10.';
+      document.getElementById('checkout').disabled = !valid;
+      document.getElementById('checkout').style.opacity = valid ? '1' : '.5';
+      return { valid, ticketCount, subtotal, discount, food, total };
+    }
+
+    function renderSnacks() {
+      foodList.innerHTML = '';
+      if (snacks.length === 0) {
+        const empty = document.createElement('li');
+        empty.className = 'empty';
+        empty.textContent = 'No snacks added yet.';
+        foodList.appendChild(empty);
+      } else {
+        snacks.forEach((snack, index) => {
+          const li = document.createElement('li');
+          const name = document.createElement('span');
+          name.textContent = `${snack[0].toUpperCase()}${snack.slice(1)} — ${money(prices[snack])}`;
+          const remove = document.createElement('button');
+          remove.type = 'button';
+          remove.className = 'remove';
+          remove.textContent = 'Remove';
+          remove.setAttribute('aria-label', `Remove ${snack}`);
+          remove.addEventListener('click', () => {
+            snacks.splice(index, 1);
+            renderSnacks();
+          });
+          li.append(name, remove);
+          foodList.appendChild(li);
+        });
+      }
+      calculate();
+    }
+
+    document.getElementById('add-food').addEventListener('click', () => {
+      snacks.push(foodSelect.value);
+      document.getElementById('receipt').classList.remove('show');
+      renderSnacks();
+    });
+    document.getElementById('clear-food').addEventListener('click', () => {
+      snacks = [];
+      document.getElementById('receipt').classList.remove('show');
+      renderSnacks();
+    });
+    ticketsInput.addEventListener('input', () => {
+      document.getElementById('receipt').classList.remove('show');
+      calculate();
+    });
+    document.getElementById('checkout').addEventListener('click', () => {
+      const bill = calculate();
+      if (!bill.valid) return;
+      document.getElementById('receipt-tickets').textContent = `Tickets: ${bill.ticketCount} × $10.00 = ${money(bill.subtotal)}`;
+      document.getElementById('receipt-snacks').textContent = `Snacks: ${snacks.length ? snacks.join(', ') : 'None'} (${money(bill.food)})`;
+      document.getElementById('receipt-discount').textContent = `Discount: ${money(bill.discount)}`;
+      document.getElementById('receipt-total').textContent = `Final total: ${money(bill.total)}`;
+      document.getElementById('receipt').classList.add('show');
+    });
+    document.getElementById('reset').addEventListener('click', () => {
+      ticketsInput.value = '1';
+      snacks = [];
+      document.getElementById('receipt').classList.remove('show');
+      renderSnacks();
+    });
+
+    renderSnacks();
+  </script>
+</body>
+</html>
