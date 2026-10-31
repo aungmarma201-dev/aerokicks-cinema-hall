@@ -1,4 +1,4 @@
-# Aerokicks Cinema Hall
+# [Aerokicks Cinema Hall](https://aungmarma201-dev.github.io/aerokicks-cinema-hall/)
 
 A small browser-based cinema ticket counter inspired by the simple interactive layout of the Morse Code WebApp example. Visitors can use the ticket calculator directly on the website, while the original command-line Python version is available to download.
 🌐 **Live Website:** [Open Aerokicks Cinema Hall](https://aungmarma201-dev.github.io/aerokicks-cinema-hall/)
